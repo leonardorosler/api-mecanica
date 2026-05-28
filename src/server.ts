@@ -8,4 +8,7 @@ app.get('/', (req, res)=>{
     res.send("Teste 001")
 })
 
-app.listen(port, () => {console.log(`Servidor rodando na porta: ${port}`)})
+app.listen(port, () => {
+    console.log(`Servidor rodando na porta: ${port}`)
+    console.log(`Acesse -> http://localhost:${port}`)
+})
