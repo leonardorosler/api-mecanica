@@ -1,8 +1,17 @@
 import express from "express"
+
+import routesMecanicos from "./routes/mecanicos"
+import routesPecas from "./routes/pecas"
+import routesConsertos from "./routes/consertos"
+
 const app = express()
 const port = 3000
 
 app.use(express.json())
+
+app.use("/mecanicos", routesMecanicos);
+app.use("/pecas", routesPecas);
+app.use("/consertos", routesConsertos);
 
 app.get('/', (req, res)=>{
     res.send("Teste 001")
