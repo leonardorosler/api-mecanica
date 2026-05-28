@@ -11,3 +11,53 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Mecanico {
+  id             Int        @id @default(autoincrement())
+  nome           String     @db.VarChar(60)
+  especialidade  String
+  email          String     @unique
+  // 1:N -> um mecânico pode possuir vários consertos
+  consertos      Conserto[]
+
+  @@map("mecanicos")
+}
+
+model Peca {
+  id            Int             @id @default(autoincrement())
+  nome_peca     String
+  qtd_estoque   Int
+  
+  preco_venda   Decimal         @db.Decimal(10, 2)
+  // uma peça pode aparecer em vários itens de conserto
+  itens         ItemConserto[]
+
+  @@map("pecas")
+}
+
+model Conserto {
+  id            Int             @id @default(autoincrement())
+  carro_modelo  String
+  data          DateTime        @default(now()) // data automática
+  mecanicoId    Int   // FK
+  // relacionamento N:1 -> muitos consertos pertencem a um mecânico
+  mecanico      Mecanico        @relation(fields: [mecanicoId], references: [id])
+  // um conserto possui vários itens
+  itens         ItemConserto[]
+
+  @@map("consertos")
+}
+
+model ItemConserto {
+  id            Int         @id @default(autoincrement())
+  consertoId    Int // FK do conserto
+  pecaId        Int // FK da peça
+  quant_usada   Int
+  preco_unit    Decimal     @db.Decimal(10, 2)
+  // relacionamento com conserto
+  conserto      Conserto    @relation(fields: [consertoId], references: [id])
+  // relacionamento com peca
+  peca          Peca        @relation(fields: [pecaId], references: [id])
+
+  @@map("itens_conserto")
+}
