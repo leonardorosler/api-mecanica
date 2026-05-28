@@ -3,10 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "dev": "npx ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js"
+   "scripts": {
+    "dev": "npx tsx watch src/server.ts"
   },
   "keywords": [],
   "author": "",
