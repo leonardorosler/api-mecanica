@@ -14,7 +14,7 @@ app.use("/pecas", routesPecas);
 app.use("/consertos", routesConsertos);
 
 app.get('/', (req, res)=>{
-    res.send("Teste 001")
+    res.send("Servidor rodando...")
 })
 
 app.listen(port, () => {
