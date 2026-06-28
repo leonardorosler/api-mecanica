@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../../lib/prisma";
 import { z } from "zod";
+import { autenticarToken } from "../middlewares/auth";
 
 const router = Router();
 
@@ -34,7 +35,7 @@ router.get("/:id", async (req, res) => {
 })
 
 // cadastra 
-router.post("/", async (req, res) => {
+router.post("/", autenticarToken, async (req, res) => {
   try {
     const valida = pecaSchema.safeParse(req.body)
     if (!valida.success) return res.status(400).json({ erro: valida.error })
