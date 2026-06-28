@@ -43,6 +43,14 @@ router.post("/", async (req, res) => {
     const valida = usuarioSchema.safeParse(req.body);
     if (!valida.success) return res.status(400).json({ erro: valida.error });
 
+    const usuarioExistente = await prisma.usuario.findUnique({
+      where: { email: valida.data.email }
+    });
+
+    if (usuarioExistente) {
+      return res.status(409).json({ erro: "Ja existe um usuario cadastrado com este e-mail" });
+    }
+
     const senhaCriptografada = await bcrypt.hash(valida.data.senha, 10);
 
     const usuario = await prisma.usuario.create({
