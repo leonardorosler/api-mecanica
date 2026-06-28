@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../../lib/prisma";
 import { z } from "zod";
-import { autenticarToken, RequestComUsuario } from "../middlewares/auth";
+import { autenticarToken, autorizarNivel, RequestComUsuario } from "../middlewares/auth";
 import { registrarLog } from "../utils/registrarLog";
 
 const router = Router();
@@ -36,7 +36,7 @@ router.get("/:id", async (req, res) => {
 })
 
 // cadastra 
-router.post("/", autenticarToken, async (req, res) => {
+router.post("/", autenticarToken, autorizarNivel(2), async (req, res) => {
   try {
     const valida = pecaSchema.safeParse(req.body)
     if (!valida.success) return res.status(400).json({ erro: valida.error })
@@ -56,7 +56,7 @@ router.post("/", autenticarToken, async (req, res) => {
 })
 
 // altera
-router.put("/:id", async (req, res) => {
+router.put("/:id", autenticarToken, autorizarNivel(2), async (req, res) => {
   try {
     const valida = pecaSchema.safeParse(req.body)
     if (!valida.success) return res.status(400).json({ erro: valida.error })
@@ -72,7 +72,7 @@ router.put("/:id", async (req, res) => {
 })
 
 // deleta
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", autenticarToken, autorizarNivel(3), async (req, res) => {
   try {
     await prisma.peca.delete({ where: { id: Number(req.params.id) } })
     res.status(200).json({ mensagem: "Peça excluída com sucesso" })

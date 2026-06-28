@@ -34,3 +34,17 @@ export function autenticarToken(req: RequestComUsuario, res: Response, next: Nex
     return res.status(401).json({ erro: "Token invalido ou expirado" });
   }
 }
+
+export function autorizarNivel(nivelMinimo: number) {
+  return (req: RequestComUsuario, res: Response, next: NextFunction) => {
+    if (!req.usuario) {
+      return res.status(401).json({ erro: "Usuario nao autenticado" });
+    }
+
+    if (req.usuario.nivel < nivelMinimo) {
+      return res.status(403).json({ erro: "Nivel de acesso insuficiente" });
+    }
+
+    next();
+  };
+}

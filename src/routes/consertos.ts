@@ -2,7 +2,7 @@ import { Router } from "express";
 import { prisma } from "../../lib/prisma";
 import z from "zod";
 import nodemailer from "nodemailer";
-import { autenticarToken, RequestComUsuario } from "../middlewares/auth";
+import { autenticarToken, autorizarNivel, RequestComUsuario } from "../middlewares/auth";
 import { registrarLog } from "../utils/registrarLog";
 
 const router = Router();
@@ -59,7 +59,7 @@ router.get("/:id", async (req, res) => {
 })
 
 // cria conserto
-router.post("/", autenticarToken, async (req, res) => {
+router.post("/", autenticarToken, autorizarNivel(2), async (req, res) => {
   try {
     const valida = consertoSchema.safeParse(req.body)
     if (!valida.success) return res.status(400).json({ erro: valida.error })
@@ -82,7 +82,7 @@ router.post("/", autenticarToken, async (req, res) => {
 })
 
 // deleta conserto
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", autenticarToken, autorizarNivel(3), async (req, res) => {
   try {
     await prisma.conserto.delete({ where: { id: Number(req.params.id) } })
     res.status(200).json({ mensagem: "Conserto excluído com sucesso" })
@@ -107,7 +107,7 @@ router.get("/:id/itens", async (req, res) => {
 // incluir item ao conserto — transação
 // verifica estoque → insere item → desconta estoque
 // se estoque insuficiente → rollback automático
-router.post("/:id/itens", autenticarToken, async (req, res) => {
+router.post("/:id/itens", autenticarToken, autorizarNivel(2), async (req, res) => {
   try {
     const valida = itemSchema.safeParse(req.body)
     if (!valida.success) return res.status(400).json({ erro: valida.error })
@@ -150,7 +150,7 @@ router.post("/:id/itens", autenticarToken, async (req, res) => {
 
 // deleta item — transação sequencial
 // exclui item → devolve quantidade ao estoque
-router.delete("/:consertoId/itens/:itemId", async (req, res) => {
+router.delete("/:consertoId/itens/:itemId", autenticarToken, autorizarNivel(3), async (req, res) => {
   try {
     const itemId = Number(req.params.itemId)
 
