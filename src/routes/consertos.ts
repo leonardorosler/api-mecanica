@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import { prisma } from "../../lib/prisma";
 import z from "zod";
@@ -25,7 +24,7 @@ const transporter = nodemailer.createTransport({
     user: process.env.MAILTRAP_USER, 
     pass: process.env.MAILTRAP_PASS 
   },
-  // resolve bug email
+  // resolve bug email - não remover
   tls: {
     rejectUnauthorized: false
   }
@@ -108,33 +107,25 @@ router.post("/:id/itens", async (req, res) => {
     const consertoId = Number(req.params.id)
 
     const item = await prisma.$transaction(async (tx: any) => {
+
       // 1. verifica se a peça existe e tem estoque
       const peca = await tx.peca.findUnique({ where: { id: pecaId } })
       if (!peca) throw new Error("Peça não encontrada")
-
       if (peca.qtd_estoque < quant_usada) {
         throw new Error(`Estoque insuficiente. Disponível: ${peca.qtd_estoque}`)
       }
-
       // 2. insere o item
       const novoItem = await tx.itemConserto.create({
         data: { consertoId, pecaId, quant_usada, preco_unit },
         include: { peca: true }
       })
-
       // 3. desconta do estoque
       await tx.peca.update({
         where: { id: pecaId },
-        data: {
-          qtd_estoque: { 
-          decrement: quant_usada 
-          }
-        }
+        data: { qtd_estoque: { decrement: quant_usada }}
       })
-
       return novoItem
     })
-
     res.status(201).json(item)
   } catch (error: any) {
     res.status(400).json({ erro: error.message || "Erro ao incluir item" })
@@ -151,7 +142,9 @@ router.delete("/:consertoId/itens/:itemId", async (req, res) => {
     if (!item) return res.status(404).json({ erro: "Item não encontrado" })
 
     await prisma.$transaction([
+      // 1. deleta
       prisma.itemConserto.delete({ where: { id: itemId } }),
+      // 2. devolve qtd_estoque
       prisma.peca.update({
         where: { id: item.pecaId },
         data: { qtd_estoque: { increment: item.quant_usada } }
@@ -177,7 +170,7 @@ router.get("/email/:id", async (req, res) => {
     const htmlMensagem = gerarTabelaHTML(conserto);
 
     await transporter.sendMail({
-      from: '"OficinaSync" <oficina@sistema.com>',
+      from: '"OficinaAvenida" <oficina@sistema.com>',
       to: conserto.mecanico.email,
       subject: `Resumo do Conserto #${conserto.id} - ${conserto.carro_modelo}`,
       html: htmlMensagem,

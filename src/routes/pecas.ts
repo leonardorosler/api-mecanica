@@ -4,7 +4,6 @@ import { z } from "zod";
 
 const router = Router();
 
-// validação com Zod
 const pecaSchema = z.object({
   nome_peca: z.string().min(2),
   qtd_estoque: z.number().int().positive(),

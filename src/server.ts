@@ -14,7 +14,8 @@ app.use("/pecas", routesPecas);
 app.use("/consertos", routesConsertos);
 
 app.get('/', (req, res)=>{
-    res.send("Servidor rodando...")
+    res.send("API oficina-mecanica")
+    
 })
 
 app.listen(port, () => {
