@@ -55,6 +55,16 @@ router.post("/", async (req, res) => {
       { expiresIn: "1h" }
     );
 
+    const ultimoLoginAnterior = usuario.ultimoLogin;
+    const mensagemUltimoLogin = ultimoLoginAnterior
+      ? `Bem-vindo. Seu ultimo acesso ao sistema foi ${ultimoLoginAnterior.toLocaleString("pt-BR")}`
+      : "Bem-vindo. Este e o seu primeiro acesso ao sistema";
+
+    await prisma.usuario.update({
+      where: { id: usuario.id },
+      data: { ultimoLogin: new Date() }
+    });
+
     await registrarLog({
       usuarioId: usuario.id,
       acao: "LOGIN_REALIZADO",
@@ -63,6 +73,7 @@ router.post("/", async (req, res) => {
 
     res.status(200).json({
       mensagem: "Login realizado com sucesso",
+      ultimoLogin: mensagemUltimoLogin,
       token,
       usuario: {
         id: usuario.id,
