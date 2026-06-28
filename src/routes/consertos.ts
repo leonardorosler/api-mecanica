@@ -2,7 +2,8 @@ import { Router } from "express";
 import { prisma } from "../../lib/prisma";
 import z from "zod";
 import nodemailer from "nodemailer";
-import { autenticarToken } from "../middlewares/auth";
+import { autenticarToken, RequestComUsuario } from "../middlewares/auth";
+import { registrarLog } from "../utils/registrarLog";
 
 const router = Router();
 
@@ -67,6 +68,13 @@ router.post("/", autenticarToken, async (req, res) => {
       data: valida.data,
       include: { mecanico: true }
     })
+
+    await registrarLog({
+      usuarioId: (req as RequestComUsuario).usuario?.id,
+      acao: "CONSERTO_CADASTRADO",
+      detalhes: `Conserto ${conserto.id} cadastrado para ${conserto.carro_modelo}`
+    });
+
     res.status(201).json(conserto)
   } catch (error) {
     res.status(500).json({ erro: "Erro ao criar conserto" })
@@ -127,6 +135,13 @@ router.post("/:id/itens", autenticarToken, async (req, res) => {
       })
       return novoItem
     })
+
+    await registrarLog({
+      usuarioId: (req as RequestComUsuario).usuario?.id,
+      acao: "ITEM_CONSERTO_CADASTRADO",
+      detalhes: `Item ${item.id} incluido no conserto ${consertoId}`
+    });
+
     res.status(201).json(item)
   } catch (error: any) {
     res.status(400).json({ erro: error.message || "Erro ao incluir item" })

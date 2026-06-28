@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { prisma } from "../../lib/prisma";
 import { z } from "zod";
-import { autenticarToken } from "../middlewares/auth";
+import { autenticarToken, RequestComUsuario } from "../middlewares/auth";
+import { registrarLog } from "../utils/registrarLog";
 
 const router = Router();
 
@@ -41,6 +42,13 @@ router.post("/", autenticarToken, async (req, res) => {
     if (!valida.success) return res.status(400).json({ erro: valida.error })
 
     const peca = await prisma.peca.create({ data: valida.data })
+
+    await registrarLog({
+      usuarioId: (req as RequestComUsuario).usuario?.id,
+      acao: "PECA_CADASTRADA",
+      detalhes: `Peca ${peca.nome_peca} cadastrada`
+    });
+
     res.status(201).json(peca)
   } catch (error) {
     res.status(500).json({ erro: "Erro ao criar peça" })

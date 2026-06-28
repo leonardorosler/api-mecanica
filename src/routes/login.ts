@@ -3,6 +3,7 @@ import { prisma } from "../../lib/prisma";
 import z from "zod";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { registrarLog } from "../utils/registrarLog";
 
 const router = Router();
 
@@ -24,12 +25,23 @@ router.post("/", async (req, res) => {
     });
 
     if (!usuario) {
+      await registrarLog({
+        acao: "LOGIN_INVALIDO",
+        detalhes: `Tentativa com e-mail nao cadastrado: ${valida.data.email}`
+      });
+
       return res.status(401).json({ erro: "E-mail ou senha invalidos" });
     }
 
     const senhaValida = await bcrypt.compare(valida.data.senha, usuario.senha);
 
     if (!senhaValida) {
+      await registrarLog({
+        usuarioId: usuario.id,
+        acao: "LOGIN_INVALIDO",
+        detalhes: `Senha invalida para ${usuario.email}`
+      });
+
       return res.status(401).json({ erro: "E-mail ou senha invalidos" });
     }
 
@@ -42,6 +54,12 @@ router.post("/", async (req, res) => {
       jwtSecret,
       { expiresIn: "1h" }
     );
+
+    await registrarLog({
+      usuarioId: usuario.id,
+      acao: "LOGIN_REALIZADO",
+      detalhes: `Usuario ${usuario.email} realizou login`
+    });
 
     res.status(200).json({
       mensagem: "Login realizado com sucesso",

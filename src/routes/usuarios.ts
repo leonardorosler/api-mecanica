@@ -4,6 +4,7 @@ import z from "zod";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import { randomInt } from "crypto";
+import { registrarLog } from "../utils/registrarLog";
 
 const router = Router();
 
@@ -100,6 +101,12 @@ router.post("/recuperar-senha", async (req, res) => {
       `
     });
 
+    await registrarLog({
+      usuarioId: usuario.id,
+      acao: "RECUPERACAO_SENHA_SOLICITADA",
+      detalhes: `Codigo enviado para ${usuario.email}`
+    });
+
     res.status(200).json({ mensagem: "Codigo de recuperacao enviado por e-mail" });
   } catch (error: any) {
     res.status(500).json({ erro: "Erro ao solicitar recuperacao de senha: " + error.message });
@@ -143,6 +150,12 @@ router.post("/alterar-senha-recuperacao", async (req, res) => {
       }
     });
 
+    await registrarLog({
+      usuarioId: usuario.id,
+      acao: "SENHA_ALTERADA_POR_RECUPERACAO",
+      detalhes: `Senha alterada por codigo de recuperacao para ${usuario.email}`
+    });
+
     res.status(200).json({ mensagem: "Senha alterada com sucesso" });
   } catch (error) {
     res.status(500).json({ erro: "Erro ao alterar senha" });
@@ -178,6 +191,12 @@ router.post("/", async (req, res) => {
         ultimoLogin: true,
         createdAt: true
       }
+    });
+
+    await registrarLog({
+      usuarioId: usuario.id,
+      acao: "USUARIO_CADASTRADO",
+      detalhes: `Usuario ${usuario.email} cadastrado`
     });
 
     res.status(201).json(usuario);
