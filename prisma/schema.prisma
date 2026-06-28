@@ -34,8 +34,20 @@ model Usuario {
   codigoExpiraEm    DateTime?
   createdAt         DateTime   @default(now())
   consertos         Conserto[]
+  logs              Log[]
 
   @@map("usuarios")
+}
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int?
+  acao      String
+  detalhes  String?
+  createdAt DateTime @default(now())
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@map("logs")
 }
 
 model Peca {
