@@ -24,14 +24,16 @@ model Mecanico {
 }
 
 model Usuario {
-  id          Int        @id @default(autoincrement())
-  nome        String     @db.VarChar(60)
-  email       String     @unique
-  senha       String
-  nivel       Int        @default(1)
-  ultimoLogin DateTime?
-  createdAt   DateTime   @default(now())
-  consertos   Conserto[]
+  id                Int        @id @default(autoincrement())
+  nome              String     @db.VarChar(60)
+  email             String     @unique
+  senha             String
+  nivel             Int        @default(1)
+  ultimoLogin       DateTime?
+  codigoRecuperacao String?
+  codigoExpiraEm    DateTime?
+  createdAt         DateTime   @default(now())
+  consertos         Conserto[]
 
   @@map("usuarios")
 }
